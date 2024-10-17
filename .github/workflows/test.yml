@@ -245,6 +245,21 @@ jobs:
           curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -s main
           cat arch/${{ env.ARCH }}/configs/${{ env.KERNEL_DEFCONFIG_PATH }}
 
+
+      - name: 🦾 Setup Kali-Nethunter
+        run: |
+          cd $GITHUB_WORKSPACE/${{ env.KERNEL_NAME }}
+          git clone https://github.com/tomxi1997/kali-nethunter_patches.git
+          patch -p1 < kali-nethunter_patches/add-rtl88xxau-5.6.4.2-drivers.patch
+          patch -p1 < kali-nethunter_patches/add-wifi-injection-4.14.patch
+          patch -p1 < kali-nethunter_patches/fix-ath9k-naming-conflict.patch
+          sleep 8
+          git clone https://github.com/acai66/Kali-defconfig-checker kali
+          cd kali
+          chmod +x *.sh
+          chmod +x check-kernel-config
+          ./check-kernel-config $GITHUB_WORKSPACE/${{ env.KERNEL_NAME }}/arch/${{ steps.generate-args.outputs.ARCH }}/configs/${{ env.KERNEL_DEFCONFIG_PATH }} -w     
+
       - name: 😋 Setup LXC docker
         working-directory: ${{ env.KERNEL_NAME }}
         env:
